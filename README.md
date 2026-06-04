@@ -1,40 +1,38 @@
 # git-wrap 🚀
 
-`git-wrap` is a lightning-fast, zero-dependency Git CLI wrapper written in Go. It is designed to optimize daily development workflows by combining local repository checks, staging, automated submodule lifecycle tracking, and an interactive commit wizard enforcing the strict **European Commission (EC) Git Commit Conventions** (based on the Conventional Commits specification).
-
-This tool serves as an excellent foundational layer for developers managing multi-repository architectures, setting up automated environments, or laying down system-level tools for advanced, automated Linux installations.
+`git-wrap` is a lightning-fast Git CLI wrapper written in Go. It is designed to optimize daily development workflows by combining local repository checks, multi-user configuration onboarding, automated submodule lifecycle tracking, and an interactive commit wizard enforcing the strict **European Commission (EC) Git Commit Conventions**.
 
 ---
 
 ## ✨ Features
 
-* **🌱 Zero-Config Auto-Initialization**: If running inside a directory that is not yet tracked by Git (no `.git` directory found), `git-wrap` automatically runs `git init`, prompts you for a remote repository name, handles the remote origin provisioning for your account, and tracks the main upstream branch smoothly.
-* **📦 Unified Workflow (`git-wrap save`)**: Chain repository validation, `git add .`, interactive commit generation, and `git push` into a single, seamless command execution loop.
-* **🇪🇺 EC Commit Compliance Wizard**: Built-in interactive CLI prompts ensuring your commit structures fully respect the European Commission component library guidelines: `<type>(<scope>): <subject>`.
-* **🧩 Smart Submodule Embedding**: On-the-fly interactive wizard options to cleanly inject, init, and recursively fetch remote Git submodules.
-* **🔍 Automated Keyword Track Integration**: Intelligently scans incoming submodule logs during execution. If a specific structural keyword track (e.g., `[track-update]`) is parsed from upstream submodules, it automatically fast-forwards your pointers and bumps your parent state seamlessly.
-* **🛡️ Built in Go**: Compiles to a single, cross-platform binary. Zero external runtime environments (NodeJS, Python, Ruby) are required on the host system.
+* **⚙️ One-Time Shared Setup (`git-wrap setup`)**: Prompts for and securely stores a user's GitHub username and Personal Access Token (PAT) inside `~/.git-wrap.json`. This makes the tool fully portable and shareable with other developers!
+* **🌱 Zero-Config Auto-Initialization**: If running inside an untracked directory, `git-wrap` automatically runs `git init`, prompts for the remote repository name and privacy status, provisions the repo directly on GitHub via its API, and binds the local workspace to the new origin.
+* **🔍 Automated Submodule Synchronization**: Intelligently scans incoming logs for all registered submodules. If a specific structural keyword track (`[track-update]`) is parsed from a submodule's remote upstream commits, it automatically fast-forwards the pointer and registers it to the parent state.
+* **🟢 Unified Workflow (`git-wrap save`)**: Chains repository evaluation, submodule tracking updates, `git add .`, interactive EC-compliant commit generation, and `git push` into a single, seamless command execution loop.
+* **🛡️ Built in Go with Cobra**: Completely modular architecture powered by the Cobra CLI framework. Compiles down to a single, cross-platform binary with zero external runtime environments required.
 
 ---
 
 ## 📂 Project Architecture
 
-The architecture maintains strict modular decoupling, splitting command routers from low-level systems commands wrappers:
+The architecture maintains strict modular decoupling, splitting command routers from backend utility logics:
 
 ```text
 git-wrap/
 ├── cmd/
-│   ├── root.go          # Core CLI configuration routing
-│   ├── save.go          # The primary 'save' workflow engine, Repository Init, & EC Wizard
-│   └── submodule.go     # Interactive submodule attachment controllers
+│   ├── root.go          # Core Cobra CLI base framework routing
+│   ├── save.go          # Core 'save' workflow engine (Repo init, API calls & Wizard)
+│   ├── setup.go         # Command router to capture user GitHub tokens
+│   └── submodule.go     # Interactive wizard to inject fresh submodules
 ├── pkg/
-│   ├── git/
-│   │   └── git.go       # System wrappers executing native Git interactions
+│   ├── config/
+│   │   └── config.go    # Safe management & serialization of ~/.git-wrap.json
 │   └── submodules/
-│       └── track.go     # Parsing logs & keyword evaluations
+│       └── track.go     # Isolated logic for log fetching & pointer manipulation
 ├── go.mod               # Go module dependencies declaration
 ├── go.sum               # Cryptographic checksums for packages
-└── main.go              # Execution application entrypoint
+└── main.go              # Simple application execution entrypoint
 
 ```
 
@@ -44,12 +42,10 @@ git-wrap/
 
 ### Prerequisites
 
-* **Git**: Your system must have standard `git` binary distributions available globally in your path environment.
-* **Go** (Only required to compile from source): version `1.18` or higher.
+* **Git**: Available globally in your system path environment.
+* **Go**: Version `1.21` or higher (to compile from source).
 
 ### Installing From Source
-
-To install `git-wrap` directly onto your local Linux, macOS, or Windows subsystem, follow these steps:
 
 ```bash
 # Clone the repository
@@ -65,51 +61,57 @@ go install
 
 ```
 
-*Ensure your environment path configuration contains `$GOPATH/bin` (typically `~/go/bin`) to invoke the command globally.*
-
 ---
 
 ## 🚀 Quick Start & Usage
 
-### 1. Execute the Unified Save Sequence
+### 1. The First-Time Setup
 
-Run the core lifecycle tool in any active directory:
+Before using the automation engine, users must configure their local environment so the tool knows where to look and push. Run:
+
+```bash
+git-wrap setup
+
+```
+
+This will securely prompt you for your **GitHub Username** and a **Personal Access Token (PAT)** (Classic PAT with `repo` scope enabled), storing them locally in `~/.git-wrap.json`.
+
+### 2. Execute the Unified Save Sequence
+
+Run the core lifecycle tool in any active working directory:
 
 ```bash
 git-wrap save
 
 ```
 
-This triggers a sequential pipeline:
+This triggers the sequential pipeline:
 
-1. **Repository Evaluation**: Checks for a local `.git` structure. If missing, it safely initializes the folder, asks for your target remote repository name, links it to your GitHub account (`git@github.com:Nexus29/<repo-name>.git`), and prepares your initial branch context.
-2. Automatically triggers `git add .` to stage your ongoing context files.
-3. Launches the interactive **EC Commit Message Wizard**.
-4. Scans tracking rules for external submodules.
-5. Performs isolated `git commit -m "<structured-message>"` generation.
-6. Injects changes into your remote origin branch dynamically.
+1. **Onboarding / Repo Evaluation**: Checks for a local `.git` structure. If missing, it creates it, leverages your configured credentials to automatically make a public/private repo on GitHub via the API, and links your local origin to `git@github.com:<your-username>/<repo-name>.git`.
+2. **Submodule Check**: Loops over your `.gitmodules` file, triggers a remote `git fetch` inside every submodule, and inspects the remote logs.
+3. **Staging**: Automatically triggers `git add .` to capture file updates and any fast-forwarded submodule links.
+4. **EC Commit Message Wizard**: Launches the interactive prompt flow.
+5. **Push**: Executes `git commit` and pushes code live to your upstream branch.
 
-### 2. The Interactive Commit Protocol
+### 3. Interactive Submodule Management
 
-When executing the wizard, `git-wrap` guides your framing to enforce valid structural definitions:
+To add a brand new submodule cleanly to your workspace layout, execute:
 
-```text
-? Select the type of change you are committing: (Use arrow keys)
-❯ feat      (Introducing new features)
-  fix       (Bug resolutions)
-  docs      (Documentation changes only)
-  style     (Formatting changes, missing semi-colons, etc.)
-  refactor  (Code changes that neither fix a bug nor add a feature)
-  perf      (Performance improvements)
-  test      (Adding missing tests or correcting existing tests)
-  chore     (Updating build tasks, package configurations, etc.)
-
-? Enter the scope of this change (optional, e.g., ui, api): core
-? Write a short, imperative tense description (lowercase, no period): integrate submodule tracker
+```bash
+git-wrap submodule
 
 ```
 
-**Resulting Standard Output Message**: `feat(core): integrate submodule tracker`
+This launches a guided prompt asking for the remote repository target URL and the local directory path, handling initialization and structure cloning seamlessly.
+
+---
+
+## 🔄 How Automated Submodule Tracking Works
+
+The submodule manipulation tracker is fully automated and relies on explicit target tags within your code ecosystem.
+
+1. **Inside the Submodule (The Sub-Project)**: When working inside a submodule, include the tag **`[track-update]`** anywhere in the commit message before pushing it up to its remote home.
+2. **Inside the Main Project**: When `git-wrap save` runs, it scans incoming logs for that keyword. If found, it automatically executes a fast-forward merge (`git merge origin/HEAD --ff-only`) right inside the submodule directory, updating the pointer to match upstream HEAD before staging the main repository files.
 
 ---
 
@@ -117,6 +119,6 @@ When executing the wizard, `git-wrap` guides your framing to enforce valid struc
 
 The framework strictly structures layout standards following the [European Commission Git Guidelines](https://ec.europa.eu/component-library/v1.15.0/eu/docs/conventions/git/):
 
-* **Types**: Must align precisely with target definitions specifying modification intents (`feat`, `fix`, etc.).
-* **Scope**: Wrapping brackets denoting contextual domains impacted by the code footprint (`(ui)`, `(api)`).
+* **Types**: Must align precisely with target definitions specifying modification intents (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`).
+* **Scope**: Wrapping brackets denoting contextual domains impacted by the code footprint (e.g., `(core)`, `(ui)`, `(api)`). *Note: `[track-update]` belongs in the submodule logs, not in the main project's wizard scope.*
 * **Subject**: Explicitly imperative present-tense framing describing the action footprint. Must begin with lowercase parameters and avoid closing punctuality attributes (`.`).
