@@ -1,6 +1,0 @@
-[submodule "libs/sub"]
-	path = libs/sub
-	url = https://github.com/Nexus29/CustomLibft
-[submodule "libs/tictoc"]
-	path = libs/tictoc
-	url = https://github.com/Nexus29/Tic-Tac-Toe
