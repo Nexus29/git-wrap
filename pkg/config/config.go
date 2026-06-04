@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 )
 
-// Config holds the user-specific settings
 type Config struct {
 	GitHubUsername string `json:"github_username"`
 	GitHubToken    string `json:"github_token"`
@@ -21,7 +20,6 @@ func GetConfigPath() (string, error) {
 	return filepath.Join(home, ".git-wrap.json"), nil
 }
 
-// Load reads the configuration file from the home directory
 func Load() (*Config, error) {
 	path, err := GetConfigPath()
 	if err != nil {
@@ -52,5 +50,5 @@ func Save(cfg *Config) error {
 		return err
 	}
 
-	return os.WriteFile(path, data, 0600) // Read/Write permissions for the owner only
+	return os.WriteFile(path, data, 0600)
 }
