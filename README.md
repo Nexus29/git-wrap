@@ -8,7 +8,7 @@
 
 * **⚙️ One-Time Shared Setup (`git-wrap setup`)**: Prompts for and securely stores a user's GitHub username and Personal Access Token (PAT) inside `~/.git-wrap.json`. This makes the tool fully portable and shareable with other developers!
 * **🌱 Zero-Config Auto-Initialization**: If running inside an untracked directory, `git-wrap` automatically runs `git init`, prompts for the remote repository name and privacy status, provisions the repo directly on GitHub via its API, and binds the local workspace to the new origin.
-* **🔍 Automated Submodule Synchronization**: Intelligently scans incoming logs for all registered submodules. If a specific structural keyword track (`[track-update]`) is parsed from a submodule's remote upstream commits, it automatically fast-forwards the pointer and registers it to the parent state.
+* **🔍 Automated Submodule Synchronization**: Intelligently scans incoming logs and commit scopes for registered submodules. If the structural keyword track (`(track-update)`) is parsed, it automatically fast-forwards the pointer and registers it to the parent state.
 * **🟢 Unified Workflow (`git-wrap save`)**: Chains repository evaluation, submodule tracking updates, `git add .`, interactive EC-compliant commit generation, and `git push` into a single, seamless command execution loop.
 * **🛡️ Built in Go with Cobra**: Completely modular architecture powered by the Cobra CLI framework. Compiles down to a single, cross-platform binary with zero external runtime environments required.
 
@@ -32,6 +32,7 @@ git-wrap/
 │       └── track.go     # Isolated logic for log fetching & pointer manipulation
 ├── go.mod               # Go module dependencies declaration
 ├── go.sum               # Cryptographic checksums for packages
+├── PKGBUILD             # Arch Linux native package deployment blueprint
 └── main.go              # Simple application execution entrypoint
 
 ```
@@ -45,7 +46,27 @@ git-wrap/
 * **Git**: Available globally in your system path environment.
 * **Go**: Version `1.21` or higher (to compile from source).
 
-### Installing From Source
+### 📦 Installing on Arch Linux (Pacman)
+
+The project includes native support for Arch Linux using `makepkg`. It is configured to compile your binary securely in isolation using your global temporary system directories without dirtying or overwriting your project's Go source `pkg/` files.
+
+```bash
+# 1. Compile the snapshot binary safely
+goreleaser release --snapshot --clean
+
+# 2. Build and install natively via pacman
+makepkg -si
+
+```
+
+To cleanly uninstall the utility from your Arch Linux system:
+
+```bash
+sudo pacman -R git-wrap
+
+```
+
+### 🛠️ Installing From Source (Alternative)
 
 ```bash
 # Clone the repository
@@ -88,7 +109,7 @@ git-wrap save
 This triggers the sequential pipeline:
 
 1. **Onboarding / Repo Evaluation**: Checks for a local `.git` structure. If missing, it creates it, leverages your configured credentials to automatically make a public/private repo on GitHub via the API, and links your local origin to `git@github.com:<your-username>/<repo-name>.git`.
-2. **Submodule Check**: Loops over your `.gitmodules` file, triggers a remote `git fetch` inside every submodule, and inspects the remote logs.
+2. **Submodule Check**: Loops over your `.gitmodules` file, triggers a remote `git fetch` inside every submodule, and inspects the remote logs and commit metadata for tracking updates.
 3. **Staging**: Automatically triggers `git add .` to capture file updates and any fast-forwarded submodule links.
 4. **EC Commit Message Wizard**: Launches the interactive prompt flow.
 5. **Push**: Executes `git commit` and pushes code live to your upstream branch.
@@ -101,17 +122,14 @@ To add a brand new submodule cleanly to your workspace layout, execute:
 git-wrap submodule
 
 ```
-
-This launches a guided prompt asking for the remote repository target URL and the local directory path, handling initialization and structure cloning seamlessly.
-
 ---
 
 ## 🔄 How Automated Submodule Tracking Works
 
-The submodule manipulation tracker is fully automated and relies on explicit target tags within your code ecosystem.
+The submodule manipulation tracker is fully automated and relies on explicit scope tags within your code history.
 
-1. **Inside the Submodule (The Sub-Project)**: When working inside a submodule, include the tag **`[track-update]`** anywhere in the commit message before pushing it up to its remote home.
-2. **Inside the Main Project**: When `git-wrap save` runs, it scans incoming logs for that keyword. If found, it automatically executes a fast-forward merge (`git merge origin/HEAD --ff-only`) right inside the submodule directory, updating the pointer to match upstream HEAD before staging the main repository files.
+1. **Tagging updates**: When committing changes meant to sync, inclusion of the **`(track-update)`** tag inside the commit scope registers with the parser.
+2. **Automated Fetch & Sync**: When `git-wrap save` runs, the parsing engine scans the target scopes of incoming logs. If a matching update track is detected, it executes a fast-forward merge (`git merge origin/HEAD --ff-only`) directly inside the target submodule workspace directory, cleanly bumping the pointer before final parent staging.
 
 ---
 
@@ -120,5 +138,5 @@ The submodule manipulation tracker is fully automated and relies on explicit tar
 The framework strictly structures layout standards following the [European Commission Git Guidelines](https://ec.europa.eu/component-library/v1.15.0/eu/docs/conventions/git/):
 
 * **Types**: Must align precisely with target definitions specifying modification intents (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`).
-* **Scope**: Wrapping brackets denoting contextual domains impacted by the code footprint (e.g., `(core)`, `(ui)`, `(api)`). *Note: `[track-update]` belongs in the submodule logs, not in the main project's wizard scope.*
+* **Scope**: Wrapping brackets denoting contextual domains impacted by the code footprint (e.g., `(core)`, `(ui)`, `(api)`, `(track-update)`).
 * **Subject**: Explicitly imperative present-tense framing describing the action footprint. Must begin with lowercase parameters and avoid closing punctuality attributes (`.`).
