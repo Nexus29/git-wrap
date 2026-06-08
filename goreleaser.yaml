@@ -1,0 +1,39 @@
+# .goreleaser.yaml
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: git-wrap
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    main: ./main.go
+    binary: git-wrap
+
+archives:
+  - formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+nfpms:
+  - id: git-wrap-packages
+    package_name: git-wrap
+    file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Arch }}"
+    vendor: git-wrap
+    homepage: https://github.com/Nexus29/git-wrap
+    maintainer: Nexus29 <giovanni.pio.lancellotta@gmail.com>
+    description: "An EC-compliant Git and Submodule manager CLI wrapper."
+    license: MIT
+    formats:
+      - deb
+
+    # contents:
+    #   # This exact path tells the package builder where your compiled binary is hiding
+    #   - src: dist/git-wrap_linux_amd64_v1/git-wrap
+    #     dst: /usr/bin/git-wrap
