@@ -43,8 +43,8 @@ func ProcessSubmodules() {
 
 		if err == nil && len(logBytes) > 0 {
 			logStr := string(logBytes)
-			if strings.Contains(logStr, "[track-update]") {
-				fmt.Printf("🔥 Found '[track-update]' tag inside submodule '%s'! Fast-forwarding...\n", submodulePath)
+			if strings.Contains(logStr, "(track-update)") {
+				fmt.Printf("🔥 Found 'track-update' tag inside submodule '%s'! Fast-forwarding...\n", submodulePath)
 				
 				mergeCmd := exec.Command("git", "merge", "origin/HEAD", "--ff-only")
 				mergeCmd.Dir = submodulePath

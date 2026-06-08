@@ -1,4 +1,3 @@
-# Maintainer: Your Name <your_email@example.com>
 BUILDDIR=/tmp/makepkg-git-wrap
 
 pkgname=git-wrap
@@ -13,6 +12,5 @@ provides=('git-wrap')
 conflicts=('git-wrap')
 
 package() {
-    # Grabs the compiled binary from GoReleaser and copies it safely
     install -Dm755 "${startdir}/dist/git-wrap_linux_amd64_v1/git-wrap" "${pkgdir}/usr/bin/git-wrap"
 }
