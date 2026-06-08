@@ -1,4 +1,6 @@
 # Maintainer: Your Name <your_email@example.com>
+BUILDDIR=/tmp/makepkg-git-wrap
+
 pkgname=git-wrap
 pkgver=0.0.1
 pkgrel=1
@@ -11,7 +13,6 @@ provides=('git-wrap')
 conflicts=('git-wrap')
 
 package() {
-    # 💡 This grabs the exact binary GoReleaser just built
-    # and tells pacman to install it globally into /usr/bin/
-    install -Dm755 "${srcdir}/../dist/git-wrap_linux_amd64_v1/git-wrap" "${pkgdir}/usr/bin/git-wrap"
+    # Grabs the compiled binary from GoReleaser and copies it safely
+    install -Dm755 "${startdir}/dist/git-wrap_linux_amd64_v1/git-wrap" "${pkgdir}/usr/bin/git-wrap"
 }

@@ -1,1 +1,9 @@
-.git-wrap.json
+# --- GoReleaser Outputs ---
+dist/
+
+# --- Arch Linux Packaging Artifacts ---
+# Ignore makepkg metadata and compilation targets
+/src/
+*.pkg.tar.zst
+*.pkg.tar.xz
+*.cb
