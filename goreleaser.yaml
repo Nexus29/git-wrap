@@ -1,3 +1,4 @@
+# .goreleaser.yaml
 version: 2
 
 before:
@@ -10,7 +11,6 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-      - windows
     goarch:
       - amd64
     main: ./main.go
@@ -21,32 +21,19 @@ archives:
       - tar.gz
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
-# 📦 Universal Linux Package Generator (NFPM)
 nfpms:
   - id: git-wrap-packages
     package_name: git-wrap
     file_name_template: "{{ .PackageName }}_{{ .Version }}_{{ .Arch }}"
     vendor: git-wrap
     homepage: https://github.com/Nexus29/git-wrap
-    maintainer: Nexus29 <maintainer@example.com>
+    maintainer: Nexus29 <giovanni.pio.lancellotta@gmail.com>
     description: "An EC-compliant Git and Submodule manager CLI wrapper."
     license: MIT
-    
-    # This targets all major Linux distribution ecosystems
     formats:
-      - deb        # Debian, Ubuntu, Pop!_OS
-      - rpm        # RedHat, Fedora, Rocky Linux
-      - apk        # Alpine Linux
-      - archlinux  # Arch Linux native package
+      - deb
 
     # contents:
+    #   # This exact path tells the package builder where your compiled binary is hiding
     #   - src: dist/git-wrap_linux_amd64_v1/git-wrap
     #     dst: /usr/bin/git-wrap
-
-# 🌐 GitHub Release Integration
-release:
-  github:
-    owner: Nexus29
-    name: git-wrap
-  draft: false
-  prerelease: auto
