@@ -32,15 +32,12 @@ nfpms:
     description: "An EC-compliant Git and Submodule manager CLI wrapper."
     license: MIT
     
+    # This targets all major Linux distribution ecosystems
     formats:
       - deb        # Debian, Ubuntu, Pop!_OS
       - rpm        # RedHat, Fedora, Rocky Linux
       - apk        # Alpine Linux
       - archlinux  # Arch Linux native package
-
-    contents:
-      - src: dist/git-wrap_linux_amd64_v1/git-wrap
-        dst: /usr/bin/git-wrap
 
 release:
   github:
