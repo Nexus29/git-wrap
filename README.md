@@ -87,6 +87,52 @@ apk add --allow-untrusted git-wrap-*.apk
 
 ---
 
+## 🗑️ Uninstallation
+
+If you need to remove `git-wrap` from your environment, run the corresponding command for your setup:
+
+### 🐧 On Arch Linux
+
+```bash
+sudo pacman -R git-wrap
+
+```
+
+### 🔹 On Ubuntu / Debian / Pop!_OS / Mint
+
+```bash
+sudo apt remove git-wrap
+
+```
+
+### 🔴 On Fedora / RedHat / RHEL
+
+```bash
+sudo dnf remove git-wrap
+
+```
+
+### 🏔️ On Alpine Linux
+
+```bash
+apk del git-wrap
+
+```
+
+### 🪟 On Windows
+
+1. Delete the `git-wrap.exe` file from your permanent folder (e.g., `C:\Program Files\git-wrap\`).
+2. Remove the folder directory from your system's **Environment Variables (PATH)**.
+
+*(Optional)* To completely clear your local credential configuration profiles across any system, remove your global user configuration file:
+
+```bash
+rm ~/.git-wrap.json
+
+```
+
+---
+
 ## 🏗️ Compile From Source (Developers Only)
 
 If you are developing or modifying `git-wrap`, you can compile the project using Go (version `1.21` or higher):
@@ -131,7 +177,7 @@ git-wrap save
 
 This triggers the sequential pipeline:
 
-1. **Onboarding / Repo Evaluation**: Checks for a local `.git` structure. If missing, it creates it, leverages your configured credentials to automatically make a public/private repo on GitHub via the API, and links your local origin to `git@github.com:<your-username>/<repo-name>.git`.
+1. **Onboarding / Repo Evaluation**: Checks for a local `.git structure`. If missing, it creates it, leverages your configured credentials to automatically make a public/private repo on GitHub via the API, and links your local origin to `git@github.com:<your-username>/<repo-name>.git`.
 2. **Submodule Check**: Loops over your `.gitmodules` file, triggers a remote `git fetch` inside every submodule, and inspects the remote logs and commit metadata for tracking updates.
 3. **Staging**: Automatically triggers `git add .` to capture file updates and any fast-forwarded submodule links.
 4. **EC Commit Message Wizard**: Launches the interactive prompt flow.
